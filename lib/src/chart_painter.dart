@@ -10,6 +10,7 @@ class PieChartPainter extends CustomPainter {
   double _total = 0;
   double _totalAngle = math.pi * 2;
 
+  final TextStyle chartCenterStyle;
   final TextStyle chartValueStyle;
   final Color chartValueBackgroundColor;
   final double initialAngle;
@@ -32,6 +33,7 @@ class PieChartPainter extends CustomPainter {
     this.showChartValuesOutside,
     List<Color> colorList, {
     this.chartValueStyle,
+    this.chartCenterStyle,
     this.chartValueBackgroundColor,
     List<double> values,
     List<String> titles,
@@ -115,12 +117,47 @@ class PieChartPainter extends CustomPainter {
   }
 
   void _drawCenterText(Canvas canvas, double side) {
-    _drawName(canvas, centerText, 0, 0, side);
+    _drawCenterName(canvas, centerText, 0, 0, side);
   }
 
   void _drawName(Canvas canvas, String name, double x, double y, double side) {
     TextSpan span = TextSpan(
       style: chartValueStyle,
+      text: name,
+    );
+    TextPainter tp = TextPainter(
+      text: span,
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout();
+
+    if (showChartValueLabel) {
+      //Draw text background box
+      final rect = Rect.fromCenter(
+        center: Offset((side / 2 + x), (side / 2 + y)),
+        width: tp.width + 6,
+        height: tp.height + 4,
+      );
+      final rRect = RRect.fromRectAndRadius(rect, Radius.circular(4));
+      final paint = Paint()
+        ..color = chartValueBackgroundColor ?? Colors.grey[200]
+        ..style = PaintingStyle.fill;
+      canvas.drawRRect(rRect, paint);
+    }
+    //Finally paint the text above box
+    tp.paint(
+      canvas,
+      new Offset(
+        (side / 2 + x) - (tp.width / 2),
+        (side / 2 + y) - (tp.height / 2),
+      ),
+    );
+  }
+  
+  void _drawCenterName(Canvas canvas, String name, double x, double y, double side) {
+    TextSpan span = TextSpan(
+      style: chartCenterStyle,
       text: name,
     );
     TextPainter tp = TextPainter(
